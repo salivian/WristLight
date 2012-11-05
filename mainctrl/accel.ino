@@ -1,3 +1,5 @@
+// #define DEBUG_SERIAL
+
 // Simple angle meter using ADXL335 accelerometer
 //from electronicsblog.net/
 
@@ -27,8 +29,8 @@ void readAccel(){
   xv=(value_x/1024.0*ADC_ref-zero_x)/sensitivity_x;
   yv=(value_y/1024.0*ADC_ref-zero_y)/sensitivity_y;
   zv=(value_z/1024.0*ADC_ref-zero_z)/sensitivity_z;
-  angleX();
-  angleY();
+//  angleX();
+//  angleY();
   angleZ();
 }
 
@@ -52,22 +54,18 @@ float angleZ(){
 
 int detectDir(){
   readAccel();
-  Serial.print(avgz);
   if (abs(avgz-270) < 45){
-    Serial.println("UP");
     return 0;
   }  
   else if(abs(avgz-360) < 45 || abs (avgz-0) < 45){
-    Serial.println("RIGHT");
     return 1;
   }    
   else if(abs(avgz-90) < 45){
-    Serial.println("DOWN");
     return 2;
   }    
   else if(abs(avgz-180) < 45){
-    Serial.println("LEFT");
     return 3;
   }    
 }
 
+float getAvgz() { return avgz; }

@@ -1,3 +1,4 @@
+//#define DEBUG_SERIAL
 int ACC_X = A0;
 int ACC_Y = A1;
 int ACC_Z = A2;
@@ -14,211 +15,91 @@ int visType = 2;
 int animType = 2;
 
 int bar[4][7] = {
-  {
-    1,1,1,1,1,1,1  }
-  ,
-  {
-    0,1,1,1,1,1,0  }
-  ,
-  {
-    0,0,1,1,1,0,0  }
-  ,
-  {
-    0,0,0,1,0,0,0  }
+  {1,1,1,1,1,1,1},
+  {0,1,1,1,1,1,0},
+  {0,0,1,1,1,0,0},
+  {0,0,0,1,0,0,0}
 };
+int barLong[7][7] = {
+  {1,0,0,0,0,0,0},
+  {1,1,0,0,0,0,0},
+  {1,1,1,0,0,0,0},
+  {1,1,1,1,0,0,0},
+  {1,1,1,1,1,0,0},
+  {1,1,1,1,1,1,0},
+  {1,1,1,1,1,1,1}
+};
+
+// the state of each 7 bars
+//int bars[7] = {0,1,2,3,2,1,0};
+int bars[7] = {0,2,0,2,0,2,3};
 
 #define PAT_HEART 0
 #define PAT_RIGHT 1
 #define PAT_LEFT  2
 #define PAT_UP    3
 #define PAT_DOWN  4
+int activePattern=PAT_UP;
 
-int patternList[5][7][7] = 
+int patterns[5][7][7] = 
 {
   { // heart
-    {
-      0,1,1,0,1,1,0    }
-    ,
-    {
-      1,1,1,1,1,1,1    }
-    ,
-    {
-      1,1,1,1,1,1,1    }
-    ,
-    {
-      0,1,1,1,1,1,0    }
-    ,
-    {
-      0,1,1,1,1,1,0    }
-    ,
-    {
-      0,0,1,1,1,0,0    }
-    ,
-    {
-      0,0,0,1,0,0,0    }
-  }
-  ,
+    {0,1,1,0,1,1,0},
+    {1,1,1,1,1,1,1},
+    {1,1,1,1,1,1,1    },
+    {0,1,1,1,1,1,0    },
+    {0,1,1,1,1,1,0    },
+    {0,0,1,1,1,0,0    },
+    {0,0,0,1,0,0,0    }
+  },
   { // right
-    {
-      0,0,0,1,0,0,0    }
-    ,
-    {
-      0,0,1,1,1,0,0    }
-    ,
-    {
-      0,1,1,1,1,1,0    }
-    ,
-    {
-      1,1,1,1,1,1,1    }
-    ,
-    {
-      0,0,1,1,1,0,0    }
-    ,
-    {
-      0,0,1,1,1,0,0    }
-    ,
-    {
-      0,0,1,1,1,0,0    }
-  }
-  ,
+    {0,0,0,1,0,0,0    },
+    {0,0,1,1,1,0,0    },
+    {0,1,1,1,1,1,0    },
+    {1,1,1,1,1,1,1    },
+    {0,0,1,1,1,0,0    },
+    {0,0,1,1,1,0,0    },
+    {0,0,1,1,1,0,0    }
+  },
   { // left
-    {
-      0,0,1,1,1,0,0    }
-    ,
-    {
-      0,0,1,1,1,0,0    }
-    ,
-    {
-      0,0,1,1,1,0,0    }
-    ,
-    {
-      1,1,1,1,1,1,1    }
-    ,
-    {
-      0,1,1,1,1,1,0    }
-    ,
-    {
-      0,0,1,1,1,0,0    }
-    ,
-    {
-      0,0,0,1,0,0,0    }
-  }
-  ,
+    {0,0,1,1,1,0,0    },
+    {0,0,1,1,1,0,0    },
+    {0,0,1,1,1,0,0    },
+    {1,1,1,1,1,1,1    },
+    {0,1,1,1,1,1,0    },
+    {0,0,1,1,1,0,0    },
+    {0,0,0,1,0,0,0    }
+  },
   { // up
-    {
-      0,0,0,1,0,0,0    }
-    ,
-    {
-      0,0,1,1,0,0,0    }
-    ,
-    {
-      0,1,1,1,1,1,1    }
-    ,
-    {
-      1,1,1,1,1,1,1    }
-    ,
-    {
-      0,1,1,1,1,1,1    }
-    ,
-    {
-      0,0,1,1,0,0,0    }
-    ,
-    {
-      0,0,0,1,0,0,0    }
-  }
-  ,
+    {0,0,0,1,0,0,0    },
+    {0,0,1,1,0,0,0    },
+    {0,1,1,1,1,1,1    },
+    {1,1,1,1,1,1,1    },
+    {0,1,1,1,1,1,1    },
+    {0,0,1,1,0,0,0    },
+    {0,0,0,1,0,0,0    }
+  },
   { // down
-    {
-      0,0,0,1,0,0,0    }
-    ,
-    {
-      0,0,0,1,1,0,0    }
-    ,
-    {
-      1,1,1,1,1,1,0    }
-    ,
-    {
-      1,1,1,1,1,1,1    }
-    ,
-    {
-      1,1,1,1,1,1,0    }
-    ,
-    {
-      0,0,0,1,1,0,0    }
-    ,
-    {
-      0,0,0,1,0,0,0    }
+    {0,0,0,1,0,0,0    },
+    {0,0,0,1,1,0,0    },
+    {1,1,1,1,1,1,0    },
+    {1,1,1,1,1,1,1    },
+    {1,1,1,1,1,1,0    },
+    {0,0,0,1,1,0,0    },
+    {0,0,0,1,0,0,0    }
   }
 };
-
-// empty pattern, will need to init it to something
-int pattern[7][7] = {
-  {
-    0,0,0,0,0,0,0  }
-  , {
-    0,0,0,0,0,0,0  }
-  , {
-    0,0,0,0,0,0,0  }
-  , {
-    0,0,0,0,0,0,0  }
-  ,
-  {
-    0,0,0,0,0,0,0  }
-  , {
-    0,0,0,0,0,0,0  }
-  , {
-    0,0,0,0,0,0,0  }
-  ,
-};
-
-void initPattern(int t){
-  for(int i=0; i<7 ; i++){
-    for(int j=0; j<7 ; j++){
-      pattern[i][j] = patternList[t][i][j];
-    }
-  }
-}
-
-int barLong[7][7] = {
-  {
-    1,0,0,0,0,0,0  }
-  ,
-  {
-    1,1,0,0,0,0,0  }
-  ,
-  {
-    1,1,1,0,0,0,0  }
-  ,
-  {
-    1,1,1,1,0,0,0  }
-  ,
-  {
-    1,1,1,1,1,0,0  }
-  ,
-  {
-    1,1,1,1,1,1,0  }
-  ,
-  {
-    1,1,1,1,1,1,1  }
-};
-
-// the state of each 7 bars
-//int bars[7] = {0,1,2,3,2,1,0};
-int bars[7] = {
-  0,2,0,2,0,2,3};
 
 // animation updatefrequency
 int irFreq = 109286;
 
-int mapCol[7] = {
-  1,3,5,7,12,10,8};
-int mapRow[7] = {
-  0,2,4,6,13,11,9};
+int mapCol[7] = {1,3,5,7,12,10,8};
+int mapRow[7] = {0,2,4,6,13,11,9};
 
 void setup() {                
-  //  Serial.begin(9600);
-
-  initPattern(PAT_LEFT);
+#if defined DEBUG_SERIAL
+  Serial.begin(9600);
+#endif
 
   // initialize all digital pins as output
   for(int i=0; i<=13; i++) pinMode(i,OUTPUT); 
@@ -230,30 +111,36 @@ void setup() {
   TCCR1B |= (1 << CS12); // 256 prescaler
   TIMSK1 |= (1 << TOIE1); // enable timer overflow interrupt
   interrupts(); // enable all interrupts
-
 }
 
 int lastdir = 0;
+int counter=0;
 
 void loop() {
   //detect dir abd load the right pattern
-  int thisdir = detectDir();
-  if (thisdir != detectDir()){ //dir change
-    if(thisdir == 0){
-      initPattern(PAT_UP);
+  counter++;
+  if(counter%10==0){ 
+    int thisdir = detectDir();
+#if defined DEBUG_SERIAL
+    Serial.print(getAvgz());
+    switch(thisdir){
+	case 0: Serial.println("U"); break;
+	case 1: Serial.println("R"); break;
+	case 2: Serial.println("D"); break;
+	case 3: Serial.println("L"); break;
+	}
+#endif 
+    if(thisdir != lastdir){ //dir change
+      switch(thisdir){
+	  case 0: activePattern = PAT_DOWN; break;
+	  case 1: activePattern = PAT_RIGHT; break;
+	  case 2: activePattern = PAT_UP; break;
+	  case 3: activePattern = PAT_LEFT; break;
+	  }
+      lastdir = thisdir; //update lastdir
     }
-    else if(thisdir == 1){
-      initPattern(PAT_RIGHT);
-    }
-    else if(thisdir == 2){
-      initPattern(PAT_LEFT);
-    }
-    else if(thisdir == 3){
-      initPattern(PAT_DOWN);
-    }
-    
-    lastdir = thisdir; //update lastdir
   }
+  
     
   // refresh whole screen: for each column...
   for(int i=0;i<7;i++) {
@@ -267,33 +154,19 @@ void loop() {
     //	delay(1);
     // set column state (only column i is on, rest is off!
     digitalWrite(mapRow[i], HIGH);
-
+	
     for(int j=0;j<7;j++){
-      int t=bars[i];
-      if(visType==0) digitalWrite(mapCol[j], !bar[t][j]);
-      if(visType==1) digitalWrite(mapCol[j], !barLong[t][j]);
-      if(visType==2) digitalWrite(mapCol[j], !pattern[i][j]);
+      switch(visType) {
+	  case 0: digitalWrite(mapCol[j], !bar[bars[i]][j]); break;
+      case 1: digitalWrite(mapCol[j], !barLong[bars[i]][j]); break;
+      case 2: digitalWrite(mapCol[j], !patterns[activePattern][i][j]); break;
+	  }
     }
     delay(2);
   }
-  /*
-
-   int x = analogRead(ACC_X);
-   int y = analogRead(ACC_Y);
-   int z = analogRead(ACC_Z);
-   Serial.print(x);
-   Serial.print(" ");
-   Serial.print(y);
-   Serial.print(" ");
-   Serial.println(z);*/
-  //  reset();
-  //  digitalWrite(led, LOW);    // turn the LED off by making the voltage LOW
-  //  delay(1000);               // wait for a second
 }
 
-
-ISR(TIMER1_OVF_vect) {
-  TCNT1 = irFreq; // preload timer
+void updateAnim(){
   // update bars
   if(animType==0){
     for(int j=0;j<7;j++){
@@ -319,11 +192,15 @@ ISR(TIMER1_OVF_vect) {
   else if(animType==2){
     for(int i=0;i<7;i++){
       for(int j=0;j<7;j++){
-        int old = pattern[i][j];
-        if(old==0) pattern[i][j] = 1;
-        else       pattern[i][j] = 0;
+        int old = patterns[activePattern][i][j];
+        if(old==0) patterns[activePattern][i][j] = 1;
+        else       patterns[activePattern][i][j] = 0;
       }
     }
   }
 }
 
+ISR(TIMER1_OVF_vect) {
+  TCNT1 = irFreq; // preload timer
+  updateAnim();
+}
