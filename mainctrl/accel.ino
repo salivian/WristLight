@@ -29,8 +29,8 @@ void readAccel(){
   xv=(value_x/1024.0*ADC_ref-zero_x)/sensitivity_x;
   yv=(value_y/1024.0*ADC_ref-zero_y)/sensitivity_y;
   zv=(value_z/1024.0*ADC_ref-zero_z)/sensitivity_z;
-//  angleX();
-//  angleY();
+  angleX();
+  angleY();
   angleZ();
 }
 

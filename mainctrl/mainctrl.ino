@@ -12,45 +12,55 @@ int visType = 2;
 // 0: increment bars, wrap at corner
 // 1: time flow (from left to right)
 // 2: flip
+// 3: none
 int animType = 2;
 
-int bar[4][7] = {
-  {1,1,1,1,1,1,1},
-  {0,1,1,1,1,1,0},
-  {0,0,1,1,1,0,0},
-  {0,0,0,1,0,0,0}
+int bar[4][8] = {
+  {1,1,1,1,1,1,1,1},
+  {0,1,1,1,1,1,0,1},
+  {0,0,1,1,1,0,0,1},
+  {0,0,0,1,0,0,0,1}
 };
-int barLong[7][7] = {
-  {1,0,0,0,0,0,0},
-  {1,1,0,0,0,0,0},
-  {1,1,1,0,0,0,0},
-  {1,1,1,1,0,0,0},
-  {1,1,1,1,1,0,0},
-  {1,1,1,1,1,1,0},
-  {1,1,1,1,1,1,1}
+int barLong[8][8] = {
+  {1,0,0,0,0,0,0,0},
+  {1,1,0,0,0,0,0,0},
+  {1,1,1,0,0,0,0,0},
+  {1,1,1,1,0,0,0,0},
+  {1,1,1,1,1,0,0,0},
+  {1,1,1,1,1,1,0,0},
+  {1,1,1,1,1,1,1,0},
+  {1,1,1,1,1,1,1,1}
 };
 
 // the state of each 7 bars
 //int bars[7] = {0,1,2,3,2,1,0};
-int bars[7] = {0,2,0,2,0,2,3};
+int bars[8] = {0,2,0,2,0,2,3,3};
 
 #define PAT_HEART 0
 #define PAT_RIGHT 1
 #define PAT_LEFT  2
 #define PAT_UP    3
 #define PAT_DOWN  4
+#define PAT_CIRCLE 	5
 int activePattern=PAT_UP;
 
 int patterns[5][7][7] = 
 {
   { // heart
-    {0,1,1,0,1,1,0},
+    {0,0,0,0,1,1,0},
+    {0,0,1,1,1,1,1},
+    {0,1,1,1,1,1,1},
+    {1,1,1,1,1,1,0},
+    {0,1,1,1,1,1,1},
+    {0,0,1,1,1,1,1},
+    {0,0,0,0,1,1,0}
+/*  {0,1,1,0,1,1,0},
     {1,1,1,1,1,1,1},
-    {1,1,1,1,1,1,1    },
-    {0,1,1,1,1,1,0    },
-    {0,1,1,1,1,1,0    },
-    {0,0,1,1,1,0,0    },
-    {0,0,0,1,0,0,0    }
+    {1,1,1,1,1,1,1},
+    {0,1,1,1,1,1,0},
+    {0,1,1,1,1,1,0},
+    {0,0,1,1,1,0,0},
+    {0,0,0,1,0,0,0}*/
   },
   { // right
     {0,0,0,1,0,0,0    },
@@ -91,7 +101,7 @@ int patterns[5][7][7] =
 };
 
 // animation updatefrequency
-int irFreq = 109286;
+int irFreq = 59286;
 
 int mapCol[7] = {1,3,5,7,12,10,8};
 int mapRow[7] = {0,2,4,6,13,11,9};
@@ -115,11 +125,19 @@ void setup() {
 
 int lastdir = 0;
 int counter=0;
+int countdown=0;
 
 void loop() {
+  if(countdown==0){
+    activePattern = PAT_HEART;
+	animType = 3;
+  } else {
+    countdown--;
+  }
   //detect dir abd load the right pattern
   counter++;
-  if(counter%10==0){ 
+  if(counter%5==0){ 
+    int pressure = analogRead(PRESSURE);
     int thisdir = detectDir();
 #if defined DEBUG_SERIAL
     Serial.print(getAvgz());
@@ -138,20 +156,18 @@ void loop() {
 	  case 3: activePattern = PAT_LEFT; break;
 	  }
       lastdir = thisdir; //update lastdir
+      TCNT1 = irFreq; // preload time
+      countdown = 200;
+	  animType=2;
     }
   }
   
-    
+  // ************** REFRESH DISPLAY ****************************
   // refresh whole screen: for each column...
   for(int i=0;i<7;i++) {
     // column : low / row : high => light up!
-    for(int j=0;j<7;j++){
-      digitalWrite(mapCol[j], HIGH);
-    }
-    for(int j=0;j<7;j++){
-      digitalWrite(mapRow[j], LOW);
-    }
-    //	delay(1);
+    for(int j=0;j<7;j++) digitalWrite(mapCol[j], HIGH);
+    for(int j=0;j<7;j++) digitalWrite(mapRow[j], LOW);
     // set column state (only column i is on, rest is off!
     digitalWrite(mapRow[i], HIGH);
 	
@@ -167,6 +183,7 @@ void loop() {
 }
 
 void updateAnim(){
+  if(animType==3) return;
   // update bars
   if(animType==0){
     for(int j=0;j<7;j++){
