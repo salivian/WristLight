@@ -264,7 +264,6 @@ void loop() {
       break;
     }
 #endif
-    /*
     if(thisdir != lastdir){ //dir change
      switch(thisdir){
      	  case 0: activePattern = PAT_DOWN; break;
@@ -278,7 +277,8 @@ void loop() {
      	  animType=2;
      }
      
-     if(rot != 0){ //rot change
+/*
+if(rot != 0){ //rot change
      switch(thisdir){
      	  case 1: activePattern = PAT_RIGHT; break;
      	  case 2: activePattern = PAT_LEFT; break;
@@ -292,7 +292,7 @@ void loop() {
       TCNT1 = irFreq; // preload time
       countdown = 200;
       animType=2;
-    }
+    }*/
   }
 
   // ************** REFRESH DISPLAY ****************************
