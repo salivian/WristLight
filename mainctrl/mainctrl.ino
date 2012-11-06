@@ -13,7 +13,8 @@ int visType = 2;
 // 1: time flow (from left to right)
 // 2: flip
 // 3: none
-int animType = 2;
+// 4: expand
+int animType = 4;
 
 int bar[4][8] = {
   {1,1,1,1,1,1,1,1},
@@ -41,10 +42,13 @@ int bars[8] = {0,2,0,2,0,2,3,3};
 #define PAT_LEFT  2
 #define PAT_UP    3
 #define PAT_DOWN  4
-#define PAT_CIRCLE 	5
-int activePattern=PAT_UP;
+#define PAT_XPAND_0 5
+#define PAT_XPAND_1 6
+#define PAT_XPAND_2 7
+#define PAT_XPAND_3 8
+int activePattern=PAT_XPAND_0;
 
-int patterns[5][8][8] = 
+int patterns[9][8][8] = 
 {
   { // heart
     {0,0,0,0,0,1,1,0},
@@ -87,16 +91,58 @@ int patterns[5][8][8] =
     {0,0,0,1,0,0,0,0}
   },
   { // down
-    {0,0,0,1,0,0,0},
-    {0,0,0,1,1,0,0},
-    {1,1,1,1,1,1,0},
-    {1,1,1,1,1,1,1},
-    {1,1,1,1,1,1,1},
-    {1,1,1,1,1,1,0},
-    {0,0,0,1,1,0,0},
-    {0,0,0,1,0,0,0}
+    {0,0,0,0,1,0,0,0},
+    {0,0,0,0,1,1,0,0},
+    {1,1,1,1,1,1,1,0},
+    {1,1,1,1,1,1,1,1},
+    {1,1,1,1,1,1,1,1},
+    {1,1,1,1,1,1,1,0},
+    {0,0,0,0,1,1,0,0},
+    {0,0,0,0,1,0,0,0}
+  },
+  { // expand-0
+    {0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0},
+    {0,0,0,1,1,0,0,0},
+    {0,0,0,1,1,0,0,0},
+    {0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0}
+  },
+  { // expand-1
+    {0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0},
+    {0,0,0,1,1,0,0,0},
+    {0,0,1,1,1,1,0,0},
+    {0,0,1,1,1,1,0,0},
+    {0,0,0,1,1,0,0,0},
+    {0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0}
+  },
+  { // expand-2
+    {0,0,0,0,0,0,0,0},
+    {0,0,0,1,1,0,0,0},
+    {0,0,0,1,1,0,0,0},
+    {0,1,1,1,1,1,1,0},
+    {0,1,1,1,1,1,1,0},
+    {0,0,0,1,1,0,0,0},
+    {0,0,0,1,1,0,0,0},
+    {0,0,0,0,0,0,0,0}
+  },
+  { // expand-3
+    {0,0,0,1,1,0,0,0},
+    {0,0,0,1,1,0,0,0},
+    {0,0,0,1,1,0,0,0},
+    {1,1,1,1,1,1,1,1},
+    {1,1,1,1,1,1,1,1},
+    {0,0,0,1,1,0,0,0},
+    {0,0,0,1,1,0,0,0},
+    {0,0,0,1,1,0,0,0}
   }
 };
+
+boolean revert=false;
 
 // animation updatefrequency
 int irFreq = 59286;
@@ -138,6 +184,11 @@ void loop() {
   counter++;
   if(counter%5==0){
     int pressure = analogRead(PRESSURE);
+	if(pressure>700){
+	  revert = true;
+	} else {
+	  revert = false;
+	}
     int thisdir = detectDir();
     int rot = detectRot();
 #if defined DEBUG_SERIAL
@@ -186,7 +237,12 @@ void loop() {
       switch(visType) {
 	  case 0: digitalWrite(mapCol[j], !bar[bars[i]][j]); break;
       case 1: digitalWrite(mapCol[j], !barLong[bars[i]][j]); break;
-      case 2: digitalWrite(mapCol[j], !patterns[activePattern][i][j]); break;
+      case 2: 
+	    if(revert)
+			digitalWrite(mapCol[j], patterns[activePattern][i][j]);
+		else 
+			digitalWrite(mapCol[j], !patterns[activePattern][i][j]);
+		break;
 	  }
     }
     delay(2);
@@ -209,21 +265,18 @@ void updateAnim(){
       }
       bars[j]=x;
     }
-  } 
-  else if(animType==1){
-    for(int j=0;j<7;j++){
-      bars[j]=bars[j+1];
-    }
+  } else if(animType==1){
+    for(int j=0;j<7;j++) bars[j]=bars[j+1];
     if(visType==0) bars[7] = random(4);
     if(visType==1) bars[7] = random(7);
-  } 
-  else if(animType==2){
-    for(int i=0;i<8;i++){
-      for(int j=0;j<8;j++){
-        int old = patterns[activePattern][i][j];
-        if(old==0) patterns[activePattern][i][j] = 1;
-        else       patterns[activePattern][i][j] = 0;
-      }
+  } else if(animType==2){
+    if(revert==false) revert=true; else revert=false;
+  } else if(animType==4){
+    switch(activePattern){
+    case PAT_XPAND_0: activePattern=PAT_XPAND_1; TCNT1 = irFreq*0.3; break;
+    case PAT_XPAND_1: activePattern=PAT_XPAND_2; TCNT1 = irFreq*0.7; break;
+    case PAT_XPAND_2: activePattern=PAT_XPAND_3; TCNT1 = irFreq*3; break;
+    case PAT_XPAND_3: activePattern=PAT_XPAND_0; TCNT1 = irFreq*0.2; break;
     }
   }
 }
