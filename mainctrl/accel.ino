@@ -1,5 +1,3 @@
-// #define DEBUG_SERIAL
-
 // Simple angle meter using ADXL335 accelerometer
 //from electronicsblog.net/
 
@@ -10,6 +8,10 @@
 #define sensitivity_x 0.3
 #define sensitivity_y 0.3
 #define sensitivity_z 0.3
+
+#define MULT_OLD (0.3)
+#define MULT_NEW (0.7)
+#define ROT_THRES (10)
 
 unsigned int value_x;
 unsigned int value_y;
@@ -36,19 +38,19 @@ void readAccel(){
 
 float angleX(){
   float ax = atan2(-yv,-zv)*57.2957795+180;
-  avgx = ax*0.1+avgx*0.9;
+  avgx = ax*MULT_OLD+avgx*MULT_NEW;
   return ax;
 }
 
 float angleY(){
   float ay = atan2(-xv,-zv)*57.2957795+180;
-  avgy = ay*0.1+avgy*0.9;
+  avgy = ay*MULT_OLD+avgy*MULT_NEW;
   return ay;
 }
 
 float angleZ(){
   float az = atan2(-yv,-xv)*57.2957795+180;
-  avgz = az*0.1+avgz*0.9;
+  avgz = az*MULT_OLD+avgz*MULT_NEW;
   return az;
 }
 
@@ -71,24 +73,33 @@ int detectDir(){
 float last_avgx=0;
 float last_avgy=0;
 float last_avgz=0;
+float diff;
 
 int detectRot(){
   readAccel();
-  float diff=avgy-last_avgy;
+  diff=avgy-last_avgy;
   last_avgy=avgy;
 
   if(abs(diff) > 180){ //pass 0 deg
     diff +=360;
   }
   
-  if(abs(diff > 30) ){
+  if(diff>-20 && diff<-10){
+    return 2;
+  }
+  if(diff>10 && diff<20){
+    return 2;
+  }
+  
+/*
+  if(abs(diff > ROT_THRES) ){
     return 1;  //right    
   }
   
-  if(abs(diff < -30) ){
+  if(abs(diff < -ROT_THRES) ){
     return 2;  //left    
   }
-  
+*/  
   return 0;
 }
 
@@ -109,3 +120,4 @@ int detectChange(){
 float getAvgx() { return avgx; }
 float getAvgy() { return avgy; }
 float getAvgz() { return avgz; }
+float getDiff() { return diff; }
