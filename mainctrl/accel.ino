@@ -68,4 +68,6 @@ int detectDir(){
   }    
 }
 
+float getAvgx() { return avgx; }
+float getAvgy() { return avgy; }
 float getAvgz() { return avgz; }

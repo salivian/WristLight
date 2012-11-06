@@ -44,67 +44,65 @@ int bars[8] = {0,2,0,2,0,2,3,3};
 #define PAT_CIRCLE 	5
 int activePattern=PAT_UP;
 
-int patterns[5][7][7] = 
+int patterns[5][8][8] = 
 {
   { // heart
-    {0,0,0,0,1,1,0},
-    {0,0,1,1,1,1,1},
-    {0,1,1,1,1,1,1},
-    {1,1,1,1,1,1,0},
-    {0,1,1,1,1,1,1},
-    {0,0,1,1,1,1,1},
-    {0,0,0,0,1,1,0}
-/*  {0,1,1,0,1,1,0},
-    {1,1,1,1,1,1,1},
-    {1,1,1,1,1,1,1},
-    {0,1,1,1,1,1,0},
-    {0,1,1,1,1,1,0},
-    {0,0,1,1,1,0,0},
-    {0,0,0,1,0,0,0}*/
+    {0,0,0,0,0,1,1,0},
+    {0,0,0,1,1,1,1,1},
+    {0,1,1,1,1,1,1,1},
+    {1,1,1,1,1,1,1,0},
+    {1,1,1,1,1,1,1,0},
+    {0,1,1,1,1,1,1,1},
+    {0,0,0,1,1,1,1,1},
+    {0,0,0,0,0,1,1,0}
   },
   { // right
-    {0,0,0,1,0,0,0    },
-    {0,0,1,1,1,0,0    },
-    {0,1,1,1,1,1,0    },
-    {1,1,1,1,1,1,1    },
-    {0,0,1,1,1,0,0    },
-    {0,0,1,1,1,0,0    },
-    {0,0,1,1,1,0,0    }
+    {0,0,0,1,1,0,0,0},
+    {0,0,1,1,1,1,0,0},
+    {0,1,1,1,1,1,1,0},
+    {1,1,1,1,1,1,1,1},
+    {0,0,1,1,1,1,0,0},
+    {0,0,1,1,1,1,0,0},
+    {0,0,1,1,1,1,0,0},
+    {0,0,1,1,1,1,0,0}
   },
   { // left
-    {0,0,1,1,1,0,0    },
-    {0,0,1,1,1,0,0    },
-    {0,0,1,1,1,0,0    },
-    {1,1,1,1,1,1,1    },
-    {0,1,1,1,1,1,0    },
-    {0,0,1,1,1,0,0    },
-    {0,0,0,1,0,0,0    }
+    {0,0,1,1,1,1,0,0},
+    {0,0,1,1,1,1,0,0},
+    {0,0,1,1,1,1,0,0},
+    {0,0,1,1,1,1,0,0},
+    {1,1,1,1,1,1,1,1},
+    {0,1,1,1,1,1,1,0},
+    {0,0,1,1,1,1,0,0},
+    {0,0,0,1,1,0,0,0}
   },
   { // up
-    {0,0,0,1,0,0,0    },
-    {0,0,1,1,0,0,0    },
-    {0,1,1,1,1,1,1    },
-    {1,1,1,1,1,1,1    },
-    {0,1,1,1,1,1,1    },
-    {0,0,1,1,0,0,0    },
-    {0,0,0,1,0,0,0    }
+    {0,0,0,1,0,0,0,0},
+    {0,0,1,1,0,0,0,0},
+    {0,1,1,1,1,1,1,1},
+    {1,1,1,1,1,1,1,1},
+    {1,1,1,1,1,1,1,1},
+    {0,1,1,1,1,1,1,1},
+    {0,0,1,1,0,0,0,0},
+    {0,0,0,1,0,0,0,0}
   },
   { // down
-    {0,0,0,1,0,0,0    },
-    {0,0,0,1,1,0,0    },
-    {1,1,1,1,1,1,0    },
-    {1,1,1,1,1,1,1    },
-    {1,1,1,1,1,1,0    },
-    {0,0,0,1,1,0,0    },
-    {0,0,0,1,0,0,0    }
+    {0,0,0,1,0,0,0},
+    {0,0,0,1,1,0,0},
+    {1,1,1,1,1,1,0},
+    {1,1,1,1,1,1,1},
+    {1,1,1,1,1,1,1},
+    {1,1,1,1,1,1,0},
+    {0,0,0,1,1,0,0},
+    {0,0,0,1,0,0,0}
   }
 };
 
 // animation updatefrequency
 int irFreq = 59286;
 
-int mapCol[7] = {1,3,5,7,12,10,8};
-int mapRow[7] = {0,2,4,6,13,11,9};
+int mapCol[8] = {1,3,5,7,12,10,8,A5};
+int mapRow[8] = {0,2,4,6,13,11,9,A4};
 
 void setup() {                
 #if defined DEBUG_SERIAL
@@ -113,6 +111,8 @@ void setup() {
 
   // initialize all digital pins as output
   for(int i=0; i<=13; i++) pinMode(i,OUTPUT); 
+  pinMode(A4,OUTPUT); 
+  pinMode(A5,OUTPUT); 
 
   // initialize timer1
   noInterrupts(); // disable all interrupts
@@ -136,7 +136,7 @@ void loop() {
   }
   //detect dir abd load the right pattern
   counter++;
-  if(counter%5==0){ 
+  if(counter%5==0){
     int pressure = analogRead(PRESSURE);
     int thisdir = detectDir();
 #if defined DEBUG_SERIAL
@@ -164,14 +164,13 @@ void loop() {
   
   // ************** REFRESH DISPLAY ****************************
   // refresh whole screen: for each column...
-  for(int i=0;i<7;i++) {
+  for(int i=0;i<8;i++) {
     // column : low / row : high => light up!
-    for(int j=0;j<7;j++) digitalWrite(mapCol[j], HIGH);
-    for(int j=0;j<7;j++) digitalWrite(mapRow[j], LOW);
+    for(int j=0;j<8;j++) digitalWrite(mapCol[j], HIGH);
     // set column state (only column i is on, rest is off!
-    digitalWrite(mapRow[i], HIGH);
+    for(int j=0;j<8;j++) digitalWrite(mapRow[j], j==i);
 	
-    for(int j=0;j<7;j++){
+    for(int j=0;j<8;j++){
       switch(visType) {
 	  case 0: digitalWrite(mapCol[j], !bar[bars[i]][j]); break;
       case 1: digitalWrite(mapCol[j], !barLong[bars[i]][j]); break;
@@ -200,15 +199,15 @@ void updateAnim(){
     }
   } 
   else if(animType==1){
-    for(int j=0;j<6;j++){
+    for(int j=0;j<7;j++){
       bars[j]=bars[j+1];
     }
-    if(visType==0) bars[6] = random(4);
-    if(visType==1) bars[6] = random(7);
+    if(visType==0) bars[7] = random(4);
+    if(visType==1) bars[7] = random(7);
   } 
   else if(animType==2){
-    for(int i=0;i<7;i++){
-      for(int j=0;j<7;j++){
+    for(int i=0;i<8;i++){
+      for(int j=0;j<8;j++){
         int old = patterns[activePattern][i][j];
         if(old==0) patterns[activePattern][i][j] = 1;
         else       patterns[activePattern][i][j] = 0;
