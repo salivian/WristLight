@@ -68,7 +68,10 @@ int detectDir(){
   }    
 }
 
+float last_avgx=0;
 float last_avgy=0;
+float last_avgz=0;
+
 int detectRot(){
   readAccel();
   float diff=avgy-last_avgy;
@@ -88,6 +91,20 @@ int detectRot(){
   
   return 0;
 }
+
+#define CHANGE_THRES 100
+
+int detectChange(){
+  readAccel();
+  float dx = avgx-last_avgx;
+  float dy = avgy-last_avgy;
+  float dz = avgz-last_avgz;
+  if((dx*dx+dy*dy+dz*dz) > CHANGE_THRES){
+    return 1;
+  }
+  return 0;
+}
+
 
 float getAvgx() { return avgx; }
 float getAvgy() { return avgy; }
