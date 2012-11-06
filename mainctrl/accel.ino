@@ -68,6 +68,27 @@ int detectDir(){
   }    
 }
 
+float last_avgy=0;
+int detectRot(){
+  readAccel();
+  float diff=avgy-last_avgy;
+  last_avgy=avgy;
+
+  if(abs(diff) > 180){ //pass 0 deg
+    diff +=360;
+  }
+  
+  if(abs(diff > 30) ){
+    return 1;  //right    
+  }
+  
+  if(abs(diff < -30) ){
+    return 2;  //left    
+  }
+  
+  return 0;
+}
+
 float getAvgx() { return avgx; }
 float getAvgy() { return avgy; }
 float getAvgz() { return avgz; }

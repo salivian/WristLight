@@ -139,6 +139,7 @@ void loop() {
   if(counter%5==0){
     int pressure = analogRead(PRESSURE);
     int thisdir = detectDir();
+    int rot = detectRot();
 #if defined DEBUG_SERIAL
     Serial.print(getAvgz());
     switch(thisdir){
@@ -147,7 +148,8 @@ void loop() {
 	case 2: Serial.println("D"); break;
 	case 3: Serial.println("L"); break;
 	}
-#endif 
+#endif
+/*
     if(thisdir != lastdir){ //dir change
       switch(thisdir){
 	  case 0: activePattern = PAT_DOWN; break;
@@ -156,6 +158,16 @@ void loop() {
 	  case 3: activePattern = PAT_LEFT; break;
 	  }
       lastdir = thisdir; //update lastdir
+      TCNT1 = irFreq; // preload time
+      countdown = 200;
+	  animType=2;
+    }
+*/    
+    if(rot != 0){ //rot change
+      switch(thisdir){
+	  case 1: activePattern = PAT_RIGHT; break;
+	  case 2: activePattern = PAT_LEFT; break;
+	  }
       TCNT1 = irFreq; // preload time
       countdown = 200;
 	  animType=2;
